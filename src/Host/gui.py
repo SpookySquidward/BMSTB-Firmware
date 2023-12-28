@@ -59,14 +59,20 @@ class main:
         self.root.destroy()
 
 
-class view_connect():
-    """Tab to connect to a target BMS test board for testing
-    """
-    
+class view():
     def __init__(self, master: Misc | None) -> None:
         # Create a frame to place graphical elements within
         self.frm = ttk.Frame(master, padding=10)
         self.frm.grid()
+
+
+class view_connect(view):
+    """Tab to connect to a target BMS test board for testing
+    """
+    
+    def __init__(self, master: Misc | None, callback_connect_disconnect: Callable[[], None]) -> None:
+        super().__init__(master=master)
+        self.callback_connect_disconnect = callback_connect_disconnect
         
         # Show the connection status in a label at the top of this screen (always start disconnected)
         self._connection_status_label = ttk.Label(self.frm)
