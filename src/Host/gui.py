@@ -4,6 +4,7 @@ from serial import Serial, SerialException
 from serial.tools.list_ports import comports
 from serial.tools.list_ports_common import ListPortInfo
 import logging
+from typing import Callable
 
 
 def pop_up_message(message: str, title: str = "Error", confirm_text: str = "Okay"):
@@ -44,14 +45,30 @@ class main:
         
         # Add tabs to the main view
         # Connect
-        self.tab_connect = view_connect(self.notebook)
+        self.tab_connect = view_connect(self.notebook, self.update_tab_selectable_state)
         self.notebook.add(self.tab_connect.frm, text="Connect")
+        
+        # Make tabs selectable only once the relevant conditions are met
+        self.update_tab_selectable_state()
         
         # Register shutdown tasks
         self.root.protocol("WM_DELETE_WINDOW", self.shutdown_tasks)
         
         # Start the GUI
         self.root.mainloop()
+    
+    
+    def update_tab_selectable_state(self):
+        # Check to see if a test board is connected
+        connected = self.tab_connect.test_board_connected
+        
+        # Update notebook tab availability accordingly
+        if connected:
+            for tab_idx in range(1, len(self.notebook.tabs())):
+                self.notebook.tab(tab_idx, state="normal")
+        else:
+            for tab_idx in range(1, len(self.notebook.tabs())):
+                self.notebook.tab(tab_idx, state="disabled")
     
     
     def shutdown_tasks(self):
@@ -198,6 +215,10 @@ class view_connect(view):
         # Update status text
         self.update_connect_disconnect_text()
         
+        # Update main window tab state
+        self.callback_connect_disconnect()
+        
+
 
 if __name__ == '__main__':
     main()
