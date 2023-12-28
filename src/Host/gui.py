@@ -44,7 +44,7 @@ class main:
         
         # Add tabs to the main view
         # Connect
-        self.tab_connect = connect(self.notebook)
+        self.tab_connect = view_connect(self.notebook)
         self.notebook.add(self.tab_connect.frm, text="Connect")
         
         # Register shutdown tasks
@@ -59,7 +59,7 @@ class main:
         self.root.destroy()
 
 
-class connect():
+class view_connect():
     """Tab to connect to a target BMS test board for testing
     """
     
@@ -94,10 +94,8 @@ class connect():
     
     @property
     def test_board_connected(self) -> bool:
-        """Whether or not a BMS test board has been connected to the host PC
-
-        Returns:
-            bool: True if a BMS test board has been connected, otherwise False.
+        """Whether or not a BMS test board has been connected to the host PC. True if a BMS test board has been
+        connected, otherwise False.
         """
         return not self.ser is None
 
@@ -117,7 +115,7 @@ class connect():
     
     def update_device_list(self):
         # Get all the relevant devices
-        devices = connect.scan_for_devices()
+        devices = view_connect.scan_for_devices()
         
         # List the values to populate (the COM ports) and the corresponding values to display (the COM ports, plus the
         # corresponding manufacturers, products, and descriptions)
@@ -142,13 +140,26 @@ class connect():
             # Open a new serial connection to the target device
             self.ser = Serial(port=device, baudrate=1152000, timeout=1.0)
             logging.info(f"Opened serial port at '{device}'")
-            
-            # TODO check to ensure the connected device is really the desired one
         
         except SerialException as e:
             # Failed to open the requested serial port, show an error popup to the user and continue
             pop_up_message(f"Failed to open serial port at '{device}'!")
             logging.info(f"Failed to open serial port at '{device}'; full traceback:\n{e}")
+            
+        # TODO check to ensure the connected device is really the desired one
+        
+        # TODO Prompt the user for the number of cells used on the test board
+        self._cell_count_series = 18
+        self._cell_count_parallel = 4
+    
+    
+    @property
+    def cell_count_series(self):
+        return self._cell_count_series if self.test_board_connected else None
+
+    @property
+    def cell_count_parallel(self):
+        return self._cell_count_parallel if self.test_board_connected else None
             
     
     def disconnect_from_test_board(self):
