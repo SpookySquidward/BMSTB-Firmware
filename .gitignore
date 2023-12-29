@@ -1,6 +1,9 @@
 # Calibration file
 calibration.npy
 
+# Settings file
+settings.json
+
 
 
 # Byte-compiled / optimized / DLL files
