@@ -293,20 +293,25 @@ class view_calibration(view):
     
     def update_calibration_status(self, unsaved_changes: bool = False):
         # See how long it has been since the last calibration (note that this may be None if the timestamp is missing or
-        # corrupted)
+        # corrupted, or if the calibration has not yet been saved to the disk)
         time_since_last_calibration = self.calibration.time_since_last_calibration()
         
-        # Check to see if a calibration is loaded
+        # Update status text
         if self.calibration.calibration_loaded:
-            if time_since_last_calibration is None:
-                status_text = "Calibration loaded. Last calibrated: unknown."
-            else:
-                status_text = f"Calibration loaded. Last calibrated: {time_since_last_calibration} ago."
+            status_text = "Calibration loaded."
         else:
-            if time_since_last_calibration is None:
-                status_text = "No calibration loaded. No calibration found to load."
-            else:
-                status_text = f"No calibration loaded. A calibration from {time_since_last_calibration} ago is available to load."
+            status_text = "No calibration loaded."
+        if time_since_last_calibration is None:
+            status_text += " No available calibration on disk."
+        else:
+            status_text += f" Calibration last saved: {time_since_last_calibration} ago."
+        
+        # Also update based on whether or not there are any unsaved canges
+        if unsaved_changes:
+            status_text += " There are unsaved changes to the calibration profile."
+            self._save_calibration_button.configure(text="Save Calibration*")
+        else:
+            self._save_calibration_button.configure(text="Save Calibration")
         
         # Update status text
         self._calibration_status_label.configure(text=status_text)
