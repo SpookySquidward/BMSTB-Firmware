@@ -122,6 +122,7 @@ class calibration():
     def auto_calibrate(self) -> None:
         # TODO
         print("auto-calibrate routine...")
+        self.use_default_calibration()
 
 
 if __name__ == "__main__":
