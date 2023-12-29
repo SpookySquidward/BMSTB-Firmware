@@ -2,6 +2,7 @@ import numpy as np
 import settings
 import logging
 from datetime import datetime, UTC
+import humanize
 
 
 class calibration():
@@ -104,6 +105,18 @@ class calibration():
         settings.current_settings[settings._key_cal_cell] = self._cell_cal_matrix.tolist()
         settings.current_settings[settings._key_cal_temp] = self._temp_cal_matrix.tolist()
         settings.current_settings[settings._key_last_calibrated] = str(datetime.now(UTC))
+        
+    
+    def time_since_last_calibrated(self) -> str:
+        try:
+            # Give a human-readable time since last calibration
+            last_calibrated_time = datetime.fromisoformat(settings.current_settings[settings._key_last_calibrated])
+            time_since_last_calibrated = datetime.now(UTC) - last_calibrated_time
+            return humanize.naturaldelta(time_since_last_calibrated)
+        except:
+            # These exceptions may come from settings, datetime, or humanize, and really should be enumerated; but I
+            # can't be bothered at the moment
+            return None
 
 
     def auto_calibrate(self) -> None:
@@ -115,7 +128,8 @@ if __name__ == "__main__":
     settings.load_saved_settings()
     
     test_cal = calibration()
-    test_cal.use_default_calibration()
+    test_cal.load_calibration()
+    print(test_cal.time_since_last_calibrated())
     print(test_cal.get_temp_command(17, 2.5, 5.0))
     print(test_cal.get_cell_command(17, 3, 23.8889, 5.0))
     test_cal.save_calibration()
