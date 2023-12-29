@@ -128,6 +128,8 @@ class view():
         # Create a frame to place graphical elements within
         self.frm = ttk.Frame(master, padding=10)
         self.frm.grid()
+        self.frm.grid_columnconfigure(0, weight=1)
+        # self.frm.grid_rowconfigure(0, weight=1)
 
 
 class view_connect(view):
