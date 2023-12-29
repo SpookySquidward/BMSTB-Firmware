@@ -16,7 +16,7 @@ def pop_up_message(message: str, title: str = "Error", confirm_text: str = "Okay
     frame.grid()
     
     # Add popup text
-    ttk.Label(frame, text=message).grid(column=0, row=0)
+    ttk.Label(frame, text=message, wraplength=400, justify="center").grid(column=0, row=0, pady=(0, 10))
     
     # Code to clear popup window
     def destroy_popup():
@@ -24,7 +24,7 @@ def pop_up_message(message: str, title: str = "Error", confirm_text: str = "Okay
         popup.destroy()
     
     # Okay button
-    okay_button = ttk.Button(popup, text=confirm_text, command = destroy_popup)
+    okay_button = ttk.Button(frame, text=confirm_text, command = destroy_popup)
     okay_button.grid(column=0, row=1)
     okay_button.focus_set()
     
