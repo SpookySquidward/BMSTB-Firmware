@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import Misc, ttk
+from tkinter import Misc, ttk, messagebox
 from serial import Serial, SerialException
 from serial.tools.list_ports import comports
 from serial.tools.list_ports_common import ListPortInfo
@@ -7,74 +7,6 @@ import logging
 from typing import Callable
 import settings
 from calibration import calibration
-
-
-def pop_up_message(message: str, title: str = "Error", confirm_text: str = "Okay"):
-    # Create the popup window
-    popup = tk.Toplevel()
-    popup.wm_title(title)
-    popup.grab_set()
-    frame = ttk.Frame(popup, padding=10)
-    frame.grid()
-    
-    # Add popup text
-    ttk.Label(frame, text=message, wraplength=400, justify="center").grid(column=0, row=0, pady=(0, 10))
-    
-    # Code to clear popup window
-    def destroy_popup():
-        popup.grab_release()
-        popup.destroy()
-    
-    # Okay button
-    okay_button = ttk.Button(frame, text=confirm_text, command = destroy_popup)
-    okay_button.grid(column=0, row=1)
-    okay_button.focus_set()
-    
-    # Also close the window if the user hits enter on the okay button
-    okay_button.bind("<Return>", lambda event: okay_button.invoke())
-
-
-def pop_up_query(query: str,
-                 confirm_callback: Callable,
-                 title: str = "Query",
-                 confirm_text: str = "Confirm",
-                 cancel_text: str = "Cancel",
-                 focus_confirm: bool = False) -> None:
-    
-    # Create the popup window
-    popup = tk.Toplevel()
-    popup.wm_title(title)
-    popup.grab_set()
-    frame = ttk.Frame(popup, padding=10)
-    frame.grid()
-    
-    # Add query text
-    ttk.Label(frame, text=query, wraplength=400, justify="center").grid(column=0, columnspan=2, row=0, pady=(0, 10))
-    
-    # Code to clear popup window
-    def destroy_popup():
-        popup.grab_release()
-        popup.destroy()
-        
-    # Confirm button
-    def confirm_button_callback():
-        destroy_popup()
-        confirm_callback()
-    confirm_button = ttk.Button(frame, text=confirm_text, command = confirm_button_callback)
-    confirm_button.grid(column=0, row=1)
-        
-    # Cancel button
-    cancel_button = ttk.Button(frame, text=cancel_text, command = destroy_popup)
-    cancel_button.grid(column=1, row=1)
-    
-    if focus_confirm:
-        # If desired, focus on the confirm button to start
-        confirm_button.focus_set()
-        # Also close the window if the user hits enter on the okay button
-        confirm_button.bind("<Return>", lambda event: confirm_button.invoke())
-    else:
-        # If no focus is specified, only focus on the parent window
-        popup.focus_set()
 
 
 class main:
@@ -209,7 +141,7 @@ class view_connect(view):
     def connect_to_test_board(self, device: str):
         # Check to see if a device was properly specified
         if device == "":
-            pop_up_message("Please select a valid device!")
+            messagebox.showerror("Error", "Please select a valid device!", parent=self.frm.master)
             return
         
         try:
@@ -219,7 +151,7 @@ class view_connect(view):
         
         except SerialException as e:
             # Failed to open the requested serial port, show an error popup to the user and continue
-            pop_up_message(f"Failed to open serial port at '{device}'!")
+            messagebox.showerror("Error", f"Failed to open serial port at '{device}'!", parent=self.frm.master)
             logging.info(f"Failed to open serial port at '{device}'; full traceback:\n{e}")
             
         # TODO check to ensure the connected device is really the desired one
@@ -279,35 +211,31 @@ class view_calibration(view):
         # Create a new calibration instance
         self.calibration = calibration()
         
+        # Automatic calibration button
+        def auto_calibrate():
+            do_calibration = messagebox.askyesno("Auto-Calibrate",
+                "The auto-calibration procedure will generate test voltages for each cell and temperature connection " +
+                "and use the BMS sense board to read the corresponding voltages which are output by the test board. " +
+                "This information will then be used to calibrate the test board so that its output voltages are " +
+                "generated accurately. The results of this calibration depend entirely on the functionality and " +
+                "accuracy of the BMS sense board which is connected, so please ensure that all connections to the BMS " +
+                "are secure and that the BMS sense board which is connected is functioning properly.\n\n" +
+                "Would you like to perform auto-calibration now?",
+                parent=self.frm.master)
+            if do_calibration:
+                self.calibration.auto_calibrate()
+                self.update_calibration_status(unsaved_changes=True)
+            
+        ttk.Button(self.frm, text="Auto-Calibrate", command=auto_calibrate).grid(column=0, row=1, pady=(0, 10))
+        
         # Show the calibration status in a label at the top of the screen
         self._calibration_status_label = ttk.Label(self.frm)
-        self._calibration_status_label.grid(column=0, row=0, pady=(0, 10))
-        self.update_calibration_status()
-        
-        # Automatic calibration button
-        def execute_auto_calibrate():
-            self.calibration.auto_calibrate()
-            self.calibration.save_calibration()
-            self.update_calibration_status()
-            settings.save_current_settings()
+        self._calibration_status_label.grid(column=0, columnspan=2, row=0, pady=(0, 10))
+        self.update_calibration_status(unsaved_changes=False)
             
-        def auto_calibrate_button():
-            pop_up_query(query="The auto-calibraion procedure will generate test voltages for each cell and " +
-                         "temperature connection and use the BMS sense board to read the corresponding voltages which " +
-                         "are output by the test board. This information will then be used to calibrate the test " +
-                         "board so that its output voltages are generated accurately. The results of this calibration " +
-                         "depend entirely on the functionality and accuracy of the BMS sense board which is connected, " +
-                         "so please ensure that all connections to the BMS are secure and that the BMS sense sense " +
-                         "board which is connected is functioning properly.\n\nThis calibration procedure will " +
-                         "overwrite any previous calibration. Would you like to continue with automatic calibration?",
-                         confirm_callback=execute_auto_calibrate,
-                         title="Warning",
-                         confirm_text="Calibrate")
-            
-        ttk.Button(self.frm, text="Auto-Calibrate", command=auto_calibrate_button).grid(column=0, row=1, pady=(0, 10))
         
     
-    def update_calibration_status(self):
+    def update_calibration_status(self, unsaved_changes: bool = False):
         # See how long it has been since the last calibration (note that this may be None if the timestamp is missing or
         # corrupted)
         time_since_last_calibration = self.calibration.time_since_last_calibration()
