@@ -228,6 +228,62 @@ class view_calibration(view):
             
         ttk.Button(self.frm, text="Auto-Calibrate", command=auto_calibrate).grid(column=0, row=1, pady=(0, 10))
         
+        # Default calibration button
+        def default_calibration():
+            do_calibration = messagebox.askyesno("Reset Calibration",
+                                                 "Would you like to restore the test board's calibration settings to " +
+                                                 "their default values?",
+                                                 parent=self.frm.master)
+            if do_calibration:
+                self.calibration.use_default_calibration()
+                self.update_calibration_status(unsaved_changes=True)
+            
+        ttk.Button(self.frm, text="Reset Calibration", command=default_calibration).grid(column=1, row=1, pady=(0, 10))
+        
+        # Save calibration button
+        def save_calibration():
+            do_save = messagebox.askyesno("Save Calibration",
+                                          "Saving the current calibration will overwrite any previous calibration " +
+                                          "data. Would you like to continue?",
+                                          parent=self.frm.master)
+            if do_save:
+                self.calibration.save_calibration()
+                self.update_calibration_status(unsaved_changes=False)
+                settings.save_current_settings()
+        
+        self._save_calibration_button = ttk.Button(self.frm, command=save_calibration)
+        self._save_calibration_button.grid(column=0, row=2, pady=(0, 10))
+        
+        # Load calibration button
+        def load_calibration():
+            # Check to see if there is an available calibration file
+            time_since_last_calibration = self.calibration.time_since_last_calibration()
+            if time_since_last_calibration is None:
+                messagebox.showerror("Load Calibration", "No calibration file was found!", parent=self.frm.master)
+                return
+            
+            # If there appears to be an available calibration, ask the user if they want to load it
+            do_load = messagebox.askyesno("Load Calibration",
+                                          "Loading a calibration profile from the disk will cause any changes to the " +
+                                          "current calibration profile to be discarded. Would you like to load a " +
+                                          "calibration profile?",
+                                          parent=self.frm.master)
+            if do_load:
+                self.calibration.load_calibration()
+                self.update_calibration_status(unsaved_changes=False)
+
+                # Check to make sure the calibration was actually loaded correctly
+                calibration_loaded = self.calibration.calibration_loaded
+                if not calibration_loaded:
+                    messagebox.showerror("Error",
+                                         "Failed to load calibration profile from the disk! This is likely due to a " +
+                                         "corrupted settings file. It is recommended that you reset the calibration " +
+                                         "profile or run the auto-calibration procedure and save the new calibration " +
+                                         "to the disk.",
+                                         parent=self.frm.master)
+        
+        ttk.Button(self.frm, text="Load Calibration", command=load_calibration).grid(column=1, row=2, pady=(0, 10))
+        
         # Show the calibration status in a label at the top of the screen
         self._calibration_status_label = ttk.Label(self.frm)
         self._calibration_status_label.grid(column=0, columnspan=2, row=0, pady=(0, 10))
