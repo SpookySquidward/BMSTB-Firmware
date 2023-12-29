@@ -6,6 +6,7 @@ from serial.tools.list_ports_common import ListPortInfo
 import logging
 from typing import Callable
 import settings
+from calibration import calibration
 
 
 def pop_up_message(message: str, title: str = "Error", confirm_text: str = "Okay"):
@@ -94,6 +95,9 @@ class main:
         # Connect
         self.tab_connect = view_connect(self.notebook, self.update_tab_selectable_state)
         self.notebook.add(self.tab_connect.frm, text="Connect")
+        # Calibration
+        self.tab_calibration = view_calibration(self.notebook)
+        self.notebook.add(self.tab_calibration.frm, text="Calibration")
         
         # Make tabs selectable only once the relevant conditions are met
         self.update_tab_selectable_state()
@@ -267,6 +271,61 @@ class view_connect(view):
         # Update main window tab state
         self.callback_connect_disconnect()
         
+
+class view_calibration(view):
+    def __init__(self, master: Misc | None) -> None:
+        super().__init__(master)
+        
+        # Create a new calibration instance
+        self.calibration = calibration()
+        
+        # Show the calibration status in a label at the top of the screen
+        self._calibration_status_label = ttk.Label(self.frm)
+        self._calibration_status_label.grid(column=0, row=0, pady=(0, 10))
+        self.update_calibration_status()
+        
+        # Automatic calibration button
+        def execute_auto_calibrate():
+            self.calibration.auto_calibrate()
+            self.calibration.save_calibration()
+            self.update_calibration_status()
+            settings.save_current_settings()
+            
+        def auto_calibrate_button():
+            pop_up_query(query="The auto-calibraion procedure will generate test voltages for each cell and " +
+                         "temperature connection and use the BMS sense board to read the corresponding voltages which " +
+                         "are output by the test board. This information will then be used to calibrate the test " +
+                         "board so that its output voltages are generated accurately. The results of this calibration " +
+                         "depend entirely on the functionality and accuracy of the BMS sense board which is connected, " +
+                         "so please ensure that all connections to the BMS are secure and that the BMS sense sense " +
+                         "board which is connected is functioning properly.\n\nThis calibration procedure will " +
+                         "overwrite any previous calibration. Would you like to continue with automatic calibration?",
+                         confirm_callback=execute_auto_calibrate,
+                         title="Warning",
+                         confirm_text="Calibrate")
+            
+        ttk.Button(self.frm, text="Auto-Calibrate", command=auto_calibrate_button).grid(column=0, row=1, pady=(0, 10))
+        
+    
+    def update_calibration_status(self):
+        # See how long it has been since the last calibration (note that this may be None if the timestamp is missing or
+        # corrupted)
+        time_since_last_calibration = self.calibration.time_since_last_calibration()
+        
+        # Check to see if a calibration is loaded
+        if self.calibration.calibration_loaded:
+            if time_since_last_calibration is None:
+                status_text = "Calibration loaded. Last calibrated: unknown."
+            else:
+                status_text = f"Calibration loaded. Last calibrated: {time_since_last_calibration} ago."
+        else:
+            if time_since_last_calibration is None:
+                status_text = "No calibration loaded. No calibration found to load."
+            else:
+                status_text = f"No calibration loaded. A calibration from {time_since_last_calibration} ago is available to load."
+        
+        # Update status text
+        self._calibration_status_label.configure(text=status_text)
 
 
 if __name__ == '__main__':
