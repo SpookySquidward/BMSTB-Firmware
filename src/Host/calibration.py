@@ -20,13 +20,13 @@ class calibration():
     
     
     @property
-    def calibration_exists(self) -> bool:
+    def calibration_loaded(self) -> bool:
         return not (self._cell_cal_matrix is None or self._temp_cal_matrix is None)
     
     
     def get_temp_command(self, idx_cell_series: int, target_voltage: float, rail_reading_5V: float) -> int:
         # Make sure the calibration matrixes exists
-        if not self.calibration_exists:
+        if not self.calibration_loaded:
             raise ValueError("No calibration found, load with use_default_calibration() or load_calibration()")
         
         # Use the calibration matrix to get the target DAC command
@@ -39,7 +39,7 @@ class calibration():
     
     def get_cell_command(self, idx_cell_series: int, idx_cell_parallel: int, target_voltage: float, rail_reading_5V: float) -> int:
         # Make sure the calibration matrixes exists
-        if not self.calibration_exists:
+        if not self.calibration_loaded:
             raise ValueError("No calibration found, load with use_default_calibration() or load_calibration()")
         
         # Use the calibration matrix to get the target DAC command
@@ -107,7 +107,7 @@ class calibration():
         settings.current_settings[settings._key_last_calibrated] = str(datetime.now(UTC))
         
     
-    def time_since_last_calibrated(self) -> str:
+    def time_since_last_calibration(self) -> str:
         try:
             # Give a human-readable time since last calibration
             last_calibrated_time = datetime.fromisoformat(settings.current_settings[settings._key_last_calibrated])
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     
     test_cal = calibration()
     test_cal.load_calibration()
-    print(test_cal.time_since_last_calibrated())
+    print(test_cal.time_since_last_calibration())
     print(test_cal.get_temp_command(17, 2.5, 5.0))
     print(test_cal.get_cell_command(17, 3, 23.8889, 5.0))
     test_cal.save_calibration()
