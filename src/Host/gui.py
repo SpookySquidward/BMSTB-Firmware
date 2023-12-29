@@ -32,6 +32,49 @@ def pop_up_message(message: str, title: str = "Error", confirm_text: str = "Okay
     okay_button.bind("<Return>", lambda event: okay_button.invoke())
 
 
+def pop_up_query(query: str,
+                 confirm_callback: Callable,
+                 title: str = "Query",
+                 confirm_text: str = "Confirm",
+                 cancel_text: str = "Cancel",
+                 focus_confirm: bool = False) -> None:
+    
+    # Create the popup window
+    popup = tk.Toplevel()
+    popup.wm_title(title)
+    popup.grab_set()
+    frame = ttk.Frame(popup, padding=10)
+    frame.grid()
+    
+    # Add query text
+    ttk.Label(frame, text=query, wraplength=400, justify="center").grid(column=0, columnspan=2, row=0, pady=(0, 10))
+    
+    # Code to clear popup window
+    def destroy_popup():
+        popup.grab_release()
+        popup.destroy()
+        
+    # Confirm button
+    def confirm_button_callback():
+        destroy_popup()
+        confirm_callback()
+    confirm_button = ttk.Button(frame, text=confirm_text, command = confirm_button_callback)
+    confirm_button.grid(column=0, row=1)
+        
+    # Cancel button
+    cancel_button = ttk.Button(frame, text=cancel_text, command = destroy_popup)
+    cancel_button.grid(column=1, row=1)
+    
+    if focus_confirm:
+        # If desired, focus on the confirm button to start
+        confirm_button.focus_set()
+        # Also close the window if the user hits enter on the okay button
+        confirm_button.bind("<Return>", lambda event: confirm_button.invoke())
+    else:
+        # If no focus is specified, only focus on the parent window
+        popup.focus_set()
+
+
 class main:
     def __init__(self) -> None:
         # Set up the main window
