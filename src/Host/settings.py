@@ -5,7 +5,7 @@ import logging
 _settings_file_path = "settings.json"
 _key_cal_temp = "temperature calibration"
 _key_cal_cell = "cell voltage calibration"
-_key_last_calibrated = "last calibrated"
+_key_last_calibrated = "last calibrated (UTC)"
 
 _default_settings = {
     _key_last_calibrated : None,

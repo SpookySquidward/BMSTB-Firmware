@@ -1,7 +1,7 @@
 import numpy as np
 import settings
 import logging
-from datetime import datetime
+from datetime import datetime, UTC
 
 
 class calibration():
@@ -103,7 +103,7 @@ class calibration():
         
         settings.current_settings[settings._key_cal_cell] = self._cell_cal_matrix.tolist()
         settings.current_settings[settings._key_cal_temp] = self._temp_cal_matrix.tolist()
-        settings.current_settings[settings._key_last_calibrated] = str(datetime.now().replace(microsecond=0))
+        settings.current_settings[settings._key_last_calibrated] = str(datetime.now(UTC))
 
 
     def auto_calibrate(self) -> None:
