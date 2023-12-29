@@ -5,6 +5,7 @@ from serial.tools.list_ports import comports
 from serial.tools.list_ports_common import ListPortInfo
 import logging
 from typing import Callable
+import settings
 
 
 def pop_up_message(message: str, title: str = "Error", confirm_text: str = "Okay"):
@@ -77,6 +78,9 @@ def pop_up_query(query: str,
 
 class main:
     def __init__(self) -> None:
+        # Load settings from settings.json
+        settings.load_saved_settings()
+
         # Set up the main window
         self.root = tk.Tk()
         self.root.wm_title("BMS Test Board Control")
