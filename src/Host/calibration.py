@@ -82,19 +82,21 @@ class calibration():
         
         # Cell calibration
         new_cell_cal_matrix = settings.current_settings[settings._key_cal_cell]
-        try:
-            self._cell_cal_matrix = np.array(new_cell_cal_matrix).astype(float)
-        except ValueError as e:
-            logging.info(f"Could not create cell calibration matrix due to the following error: '{e}'. Defaulting to no caolibration.")
-            self._cell_cal_matrix = None
+        if not new_cell_cal_matrix == settings._default_settings[settings._key_cal_cell]:
+            try:
+                self._cell_cal_matrix = np.array(new_cell_cal_matrix).astype(float)
+            except ValueError as e:
+                logging.info(f"Could not create cell calibration matrix due to the following error: '{e}'. Defaulting to no caolibration.")
+                self._cell_cal_matrix = None
         
         # Temp calibration
         new_temp_cal_matrix = settings.current_settings[settings._key_cal_temp]
-        try:
-            self._temp_cal_matrix = np.array(new_temp_cal_matrix)
-        except ValueError as e:
-            logging.info(f"Could not create temp calibration matrix due to the following error: '{e}'. Defaulting to no caolibration.")
-            self._temp_cal_matrix = None
+        if not new_temp_cal_matrix == settings._default_settings[settings._key_cal_temp]:
+            try:
+                self._temp_cal_matrix = np.array(new_temp_cal_matrix)
+            except ValueError as e:
+                logging.info(f"Could not create temp calibration matrix due to the following error: '{e}'. Defaulting to no caolibration.")
+                self._temp_cal_matrix = None
         
     
     def save_calibration(self) -> None:
