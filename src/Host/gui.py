@@ -182,7 +182,7 @@ class view_connect(view):
         # The connect/disconnect button's function depends on whether a device is already connected; check state
         connected = self.test_board_connected
         if connected:
-            self.disconnect_from_test_board
+            self.disconnect_from_test_board()
         else:
             # Get the target device from the combobox and attempt to connect to it
             target_device = self._device_drop_down_text.get()
