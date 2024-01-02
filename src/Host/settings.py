@@ -3,11 +3,19 @@ import logging
 
 
 _settings_file_path = "settings.json"
+_key_cells_series = "series cell count"
+_key_cells_parallel = "parallel cell count"
+_key_serial_baudrate = "serial baudrate"
+_key_serial_timeout = "serial timeout (s)"
 _key_cal_temp = "temperature calibration"
 _key_cal_cell = "cell voltage calibration"
 _key_last_calibrated = "last calibrated (UTC)"
 
 _default_settings = {
+    _key_cells_series: 18,
+    _key_cells_parallel: 4,
+    _key_serial_baudrate: 115200,
+    _key_serial_timeout: 1.0,
     _key_last_calibrated : None,
     _key_cal_temp: None,
     _key_cal_cell: None,

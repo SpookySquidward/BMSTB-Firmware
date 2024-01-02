@@ -144,7 +144,9 @@ class view_connect(view):
         
         try:
             # Open a new serial connection to the target device
-            self.ser = Serial(port=device, baudrate=1152000, timeout=1.0)
+            self.ser = Serial(port=device,
+                              baudrate=settings.current_settings[settings._key_serial_baudrate],
+                              timeout=settings.current_settings[settings._key_serial_timeout])
             logging.info(f"Opened serial port at '{device}'")
         
         except SerialException as e:
@@ -155,17 +157,8 @@ class view_connect(view):
         # TODO check to ensure the connected device is really the desired one
         
         # TODO Prompt the user for the number of cells used on the test board
-        self._cell_count_series = 18
-        self._cell_count_parallel = 4
-    
-    
-    @property
-    def cell_count_series(self):
-        return self._cell_count_series if self.test_board_connected else None
-
-    @property
-    def cell_count_parallel(self):
-        return self._cell_count_parallel if self.test_board_connected else None
+        settings.current_settings[settings._key_cells_series] = 18
+        settings.current_settings[settings._key_cells_parallel] = 4
             
     
     def disconnect_from_test_board(self):
