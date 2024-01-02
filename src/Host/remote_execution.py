@@ -5,7 +5,7 @@ import settings
 _seq_cmd_prompt = b'>>> '
 
 
-def _send_bytes(target_bytes: bytes, device: Serial, expected_sequence: bytes, retry_count: int = 1) -> bool:
+def _send_bytes(target_bytes: bytes, device: Serial, expected_sequence: bytes, retry_count: int = 1, expected_sequence_is_complete: bool = True) -> bool:
     for transmit_attempts in range(retry_count):
         
         # Send target bytes
@@ -13,7 +13,8 @@ def _send_bytes(target_bytes: bytes, device: Serial, expected_sequence: bytes, r
         
         # Listen for the expected return sequence
         read_data = device.read_until(expected_sequence)
-        if read_data == expected_sequence:
+        if (read_data == expected_sequence and expected_sequence_is_complete) or \
+            (expected_sequence in read_data and not expected_sequence_is_complete):
             # The correct return sequence was found
             return True
         
@@ -77,6 +78,19 @@ def execute_code(code: str, device: Serial, retry_count: int = 3) -> str:
     return read_data.decode("ASCII")
 
 
+def reset_device(device: Serial, retry_count: int = 3) -> None:
+    # Send ctrl-C (ASCII code 0x03) to exit from any line of code which has been typed or any code which is currently
+    # executing
+    cancel_success = _send_bytes(b'\x03', device, b'\r\n' + _seq_cmd_prompt, retry_count)
+    if not cancel_success:
+        raise SerialException("Failed to reset device because queued or running code could not be cancelled.")
+    
+    # Send ctrl-D (ASCII code 0x04) to reset the target device
+    reset_success = cancel_success = _send_bytes(b'\x04', device, b'\r\n' + _seq_cmd_prompt, retry_count, expected_sequence_is_complete=False)
+    if not reset_success:
+        raise SerialException("Failed to reset device because it did not resmpond to a soft reset request.")
+
+
 if __name__ == "__main__":
     import time
 
@@ -84,6 +98,12 @@ if __name__ == "__main__":
     ser = Serial(port="COM3",
                  baudrate=settings.current_settings[settings._key_serial_baudrate],
                  timeout=settings.current_settings[settings._key_serial_timeout])
+    
+    # Reset the device
+    execute_code("x = 3", ser)
+    print(execute_code("x", ser))
+    reset_device(ser)
+    print(execute_code("x", ser))
     
     execute_code("from machine import Pin", ser)
     execute_code("led = Pin(25, Pin.OUT)", ser)
