@@ -74,6 +74,10 @@ def execute_code(code: str, device: Serial, retry_count: int = 3) -> str:
     # Strip the command prompt sequence from the returned data
     read_data = read_data[:(-1 * len(_seq_cmd_prompt))]
     
+    # And \n\r if the returned data is non-Null
+    if read_data[-2:] == b'\r\n':
+        read_data = read_data[:-2]
+    
     # Convert the returned data to a string and return it to the caller
     return read_data.decode("ASCII")
 
