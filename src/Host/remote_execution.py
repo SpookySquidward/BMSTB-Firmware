@@ -49,8 +49,7 @@ def execute_code(code: str, device: Serial, retry_count: int = 3) -> str:
             break
         
         # Code was not transmitted successfully, attempt to cancel its execution with ctrl-C (ASCII code 0x03)
-        cancel_success = _send_bytes(b'\x03', device, _seq_cmd_prompt, retry_count)
-        # Code execution could not be cancelled successfully, raise an exception
+        cancel_success = _send_bytes(b'\x03', device, b'\r\n' + _seq_cmd_prompt, retry_count)
         if not cancel_success:
             raise SerialException(f"Failed to cancel the execution of the following line of code after it was incorrectly transmitted to the target device: '{code}'")
             
@@ -61,9 +60,8 @@ def execute_code(code: str, device: Serial, retry_count: int = 3) -> str:
         
     # Once the code has been successfully transmitted, transmit a newline character to begin execution
     execute_success = _send_bytes(b'\r', device, b'\r\n', retry_count)
-    # Code execution could not start successfully
     if not execute_success:
-        raise SerialException(f"Failed to execute the following line of code because it could not begin execution: '{code}'")
+        raise SerialException(f"Failed to begin execution of the following line of code: '{code}'")
     
     # Get the returned data from the target device
     read_data = device.read_until(_seq_cmd_prompt)
