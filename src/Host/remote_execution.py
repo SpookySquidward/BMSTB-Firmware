@@ -28,6 +28,8 @@ def execute_code(code: str, device: Serial, retry_count: int = 3) -> str:
     Args:
         code (str): The code to execute. This code must be ASCII-encodable.
         device (Serial): The target device on which to execute MicroPython code.
+        retry_count (int): The maximum number of times to attempt to execute the specified `code` before a
+        `serial.SerialException` is raised.
 
     Raises:
         UnicodeDecodeError: if the passed argument `code` is not ASCII-encodable.
@@ -129,12 +131,14 @@ if __name__ == "__main__":
     execute_code("x = 3", ser)
     print(execute_code("x", ser))
     reset_device(ser)
+    # This line should give a NameError, as the target device will have been reset and x will no longer be defined
     print(execute_code("x", ser))
     
     # Print a random integer
     execute_code("from random import randrange", ser)
     print(execute_function("randrange", ser, 3, 1, 1000))
     
+    # Blink the LED
     execute_code("from machine import Pin", ser)
     execute_code("led = Pin(25, Pin.OUT)", ser)
     while True:
