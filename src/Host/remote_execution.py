@@ -82,6 +82,28 @@ def execute_code(code: str, device: Serial, retry_count: int = 3) -> str:
     return read_data.decode("ASCII")
 
 
+def execute_function(function_name: str, device: Serial, retry_count: int = 3, *args, **kwargs) -> str:
+    """Executes a function remotely given the specified arguments
+
+    Args:
+        function_name (str): The function to execute. This function name must be ASCII-encodable.
+        device (Serial): The target device on which to execute MicroPython code.
+        retry_count (int): The maximum number of times to attempt to execute the specified function before a
+        `serial.SerialException` is raised.
+
+    Returns:
+        str: The data returned from the device after executing the specified function.
+    """
+    
+    # Using the given function name and arguments, construct a line of code to execute remotely
+    args_str = ', '.join(str(arg) for arg in args)
+    kwargs_str = ', '.join(f'{key} = {value}' for key, value in kwargs.items())
+    code_to_execute = f"{function_name}({', '.join((args_str, kwargs_str))})"
+    
+    # Execute the relevant code and return the result
+    return execute_code(code_to_execute, device, retry_count)
+
+
 def reset_device(device: Serial, retry_count: int = 3) -> None:
     # Send ctrl-C (ASCII code 0x03) to exit from any line of code which has been typed or any code which is currently
     # executing
@@ -108,6 +130,10 @@ if __name__ == "__main__":
     print(execute_code("x", ser))
     reset_device(ser)
     print(execute_code("x", ser))
+    
+    # Print a random integer
+    execute_code("from random import randrange", ser)
+    print(execute_function("randrange", ser, 3, 1, 1000))
     
     execute_code("from machine import Pin", ser)
     execute_code("led = Pin(25, Pin.OUT)", ser)
