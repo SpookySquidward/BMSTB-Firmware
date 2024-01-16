@@ -216,5 +216,9 @@ if __name__ == "__main__":
     
     # Blink the LED
     set_status_LED(ser, True)
-    time.sleep(5)
+    start_time = time.time()
+    for i in range(20):
+        print("5V rail reading:", test_cal.get_voltage_5V(read_ADC_5V(ser)), "[V]")
+        print("24V rail reading:", test_cal.get_voltage_24V(read_ADC_24V(ser)), "[V]")
+    print(f"Time to read rails: {time.time() - start_time}")
     set_status_LED(ser, False)

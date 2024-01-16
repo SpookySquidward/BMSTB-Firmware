@@ -25,7 +25,7 @@ _default_settings = {
     _key_serial_retry_count: 3,
     _key_status_LED_blink_rate: 5,
     _key_local_adc_read_samples: 1024,
-    _key_local_adc_read_frequency: 100000,
+    _key_local_adc_read_frequency: 25000,
     _key_last_calibrated : None,
     _key_cal_5V: None,
     _key_cal_24V: None,
