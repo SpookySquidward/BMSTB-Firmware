@@ -178,6 +178,7 @@ def read_ADC_24V(device: Serial) -> float:
 
 if __name__ == "__main__":
     import time
+    from calibration import calibration
 
     settings.load_saved_settings()
     ser = Serial(port="COM3",
@@ -193,8 +194,9 @@ if __name__ == "__main__":
     
     # Read the 5V and 24V rails
     init_device(ser)
-    print("5V rail reading: ", read_ADC_5V(ser))
-    print("24V rail reading: ", read_ADC_24V(ser))
+    test_cal = calibration()
+    print("5V rail reading:", test_cal.get_voltage_5V(read_ADC_5V(ser)), "[V]")
+    print("24V rail reading:", test_cal.get_voltage_24V(read_ADC_24V(ser)), "[V]")
     
     # Blink the LED
     execute_code("from machine import Pin", ser)

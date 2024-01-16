@@ -10,9 +10,11 @@ _key_serial_timeout = "serial timeout (s)"
 _key_serial_retry_count = "serial transmission retry count"
 _key_local_adc_read_samples = "5V/24V rail monitor samples"
 _key_local_adc_read_frequency = "5V/24V rail monitor frequency"
+_key_last_calibrated = "last calibrated (UTC)"
+_key_cal_5V = "5V rail monitor calibration"
+_key_cal_24V = "24V rail monitor calibration"
 _key_cal_temp = "temperature calibration"
 _key_cal_cell = "cell voltage calibration"
-_key_last_calibrated = "last calibrated (UTC)"
 
 _default_settings = {
     _key_cells_series: 18,
@@ -23,6 +25,8 @@ _default_settings = {
     _key_local_adc_read_samples: 1024,
     _key_local_adc_read_frequency: 100000,
     _key_last_calibrated : None,
+    _key_cal_5V: None,
+    _key_cal_24V: None,
     _key_cal_temp: None,
     _key_cal_cell: None,
 }
