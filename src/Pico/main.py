@@ -9,10 +9,15 @@ class main:
         self.adc_sense_24V = ADC(self.pin_sense_24V)
         self.pin_sense_5V = Pin(26)
         self.adc_sense_5V = ADC(self.pin_sense_5V)
+        self.pin_led = Pin(25, Pin.OUT)
         
         # ADC read information
         self.local_adc_read_samples = local_adc_read_samples
         self.local_adc_read_frequency = local_adc_read_frequency
+        
+        # Activity LED timer
+        self.status_LED_timer = None
+        self.set_status_LED(False)
 
 
     def _read_ADC(self, adc):
@@ -52,3 +57,21 @@ class main:
 
     def read_ADC_24V(self):
         return self._read_ADC(self.adc_sense_24V)
+    
+    
+    def set_status_LED(self, blink_LED, blink_rate = None):
+        # If blink_LED is True, start blinking at blink_rate
+        if blink_LED:
+            def blink_callback(_):
+                self.pin_led.toggle()
+                
+            self.status_LED_timer = Timer(-1)
+            self.status_LED_timer.init(mode=Timer.PERIODIC, freq=blink_rate*2, callback=blink_callback)
+            
+        # Otherwise, clear the timer and leave the LED on to indicate power present
+        else:
+            if self.status_LED_timer is not None:
+                self.status_LED_timer.deinit()
+                self.status_LED_timer = None
+                
+            self.pin_led.high()

@@ -111,8 +111,7 @@ def execute_function(function_name: str, device: Serial, *args, **kwargs) -> str
 
 def reset_device(device: Serial, retry_count: int = None) -> None:
     # Set retry_count to its default value if not specified
-    if retry_count is None:
-        retry_count = settings.current_settings[settings._key_serial_retry_count]
+    retry_count = settings.current_settings[settings._key_serial_retry_count] if retry_count is None else retry_count
         
     # Send ctrl-C (ASCII code 0x03) to exit from any line of code which has been typed or any code which is currently
     # executing
@@ -176,6 +175,23 @@ def read_ADC_24V(device: Serial) -> float:
     return float(reading)
 
 
+def set_status_LED(device: Serial, blink_LED: bool = False, blink_rate: int = None) -> None:
+    """Enables or disables the status LED on the target device.
+
+    Args:
+        device (Serial): The target device.
+        blink_LED (bool, optional): Whether or not the status LED should blink. Defaults to False.
+        blink_rate (int, optional): The rate at which the status LED blinks, if `blink_LED` is True; if `blink_LED` is
+        False, this argument is ignored. If None, defaults to the value specified in the settings file. Defaults to
+        None.
+    """
+    # Set blink_rate to its default value if not specified
+    blink_rate = settings.current_settings[settings._key_status_LED_blink_rate] if blink_rate is None else blink_rate
+    
+    function_name = _board_obj_name + ".set_status_LED"
+    print(execute_function(function_name, device, blink_LED = blink_LED, blink_rate = blink_rate))
+
+
 if __name__ == "__main__":
     import time
     from calibration import calibration
@@ -199,8 +215,6 @@ if __name__ == "__main__":
     print("24V rail reading:", test_cal.get_voltage_24V(read_ADC_24V(ser)), "[V]")
     
     # Blink the LED
-    execute_code("from machine import Pin", ser)
-    execute_code("led = Pin(25, Pin.OUT)", ser)
-    while True:
-        execute_code("led.toggle()", ser)
-        time.sleep(0.5)
+    set_status_LED(ser, True)
+    time.sleep(5)
+    set_status_LED(ser, False)

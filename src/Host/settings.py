@@ -8,8 +8,9 @@ _key_cells_parallel = "parallel cell count"
 _key_serial_baudrate = "serial baudrate"
 _key_serial_timeout = "serial timeout (s)"
 _key_serial_retry_count = "serial transmission retry count"
+_key_status_LED_blink_rate = "Status LED blink rate (Hz)"
 _key_local_adc_read_samples = "5V/24V rail monitor samples"
-_key_local_adc_read_frequency = "5V/24V rail monitor frequency"
+_key_local_adc_read_frequency = "5V/24V rail monitor sample frequency (Hz)"
 _key_last_calibrated = "last calibrated (UTC)"
 _key_cal_5V = "5V rail monitor calibration"
 _key_cal_24V = "24V rail monitor calibration"
@@ -22,6 +23,7 @@ _default_settings = {
     _key_serial_baudrate: 115200,
     _key_serial_timeout: 1.0,
     _key_serial_retry_count: 3,
+    _key_status_LED_blink_rate: 5,
     _key_local_adc_read_samples: 1024,
     _key_local_adc_read_frequency: 100000,
     _key_last_calibrated : None,
