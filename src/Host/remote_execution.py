@@ -22,14 +22,15 @@ def _send_bytes(target_bytes: bytes, device: Serial, expected_sequence: bytes, r
     return False
 
 
-def execute_code(code: str, device: Serial, retry_count: int = 3) -> str:
+def execute_code(code: str, device: Serial, retry_count: int = None):
     """_summary_
 
     Args:
         code (str): The code to execute. This code must be ASCII-encodable.
         device (Serial): The target device on which to execute MicroPython code.
         retry_count (int): The maximum number of times to attempt to execute the specified `code` before a
-        `serial.SerialException` is raised.
+        `serial.SerialException` is raised. If None, defaults to the value specified in the settings file. Defaults to
+        None.
 
     Raises:
         UnicodeDecodeError: if the passed argument `code` is not ASCII-encodable.
@@ -39,6 +40,10 @@ def execute_code(code: str, device: Serial, retry_count: int = 3) -> str:
     Returns:
         str: The data returned from the device after executing the specified `code`.
     """
+    
+    # Set retry_count to its default value if not specified
+    if retry_count is None:
+        retry_count = settings.current_settings[settings._key_serial_retry_count]
     
     # Convert input code to ASCII bytes for serial transmission
     code_bytes = bytes(code, "ASCII", "strict")
@@ -84,14 +89,12 @@ def execute_code(code: str, device: Serial, retry_count: int = 3) -> str:
     return read_data.decode("ASCII")
 
 
-def execute_function(function_name: str, device: Serial, retry_count: int = 3, *args, **kwargs) -> str:
+def execute_function(function_name: str, device: Serial, *args, **kwargs) -> str:
     """Executes a function remotely given the specified arguments
 
     Args:
         function_name (str): The function to execute. This function name must be ASCII-encodable.
         device (Serial): The target device on which to execute MicroPython code.
-        retry_count (int): The maximum number of times to attempt to execute the specified function before a
-        `serial.SerialException` is raised.
 
     Returns:
         str: The data returned from the device after executing the specified function.
@@ -103,10 +106,14 @@ def execute_function(function_name: str, device: Serial, retry_count: int = 3, *
     code_to_execute = f"{function_name}({', '.join((args_str, kwargs_str))})"
     
     # Execute the relevant code and return the result
-    return execute_code(code_to_execute, device, retry_count)
+    return execute_code(code_to_execute, device)
 
 
-def reset_device(device: Serial, retry_count: int = 3) -> None:
+def reset_device(device: Serial, retry_count: int = None) -> None:
+    # Set retry_count to its default value if not specified
+    if retry_count is None:
+        retry_count = settings.current_settings[settings._key_serial_retry_count]
+        
     # Send ctrl-C (ASCII code 0x03) to exit from any line of code which has been typed or any code which is currently
     # executing
     cancel_success = _send_bytes(b'\x03', device, b'\r\n' + _seq_cmd_prompt, retry_count)
