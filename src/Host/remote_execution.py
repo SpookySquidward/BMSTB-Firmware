@@ -153,8 +153,7 @@ def read_ADC_5V(device: Serial) -> float:
         device (Serial): The target device.
 
     Returns:
-        float: A value between 0.0 and 1.0 read from the SENSE_5V ADC line, where 0.0 corresponds to 0.0V and 1.0
-        corresponds to 3.0V nominal.
+        float: The nominal voltage at the SENSE_5V ADC input
     """
     
     function_name = _board_obj_name + ".read_ADC_5V"
@@ -169,8 +168,7 @@ def read_ADC_24V(device: Serial) -> float:
         device (Serial): The target device.
 
     Returns:
-        float: A value between 0.0 and 1.0 read from the SENSE_24V ADC line, where 0.0 corresponds to 0.0V and 1.0
-        corresponds to 3.0V nominal.
+        float: The nominal voltage at the SENSE_5V ADC input
     """
     
     function_name = _board_obj_name + ".read_ADC_24V"

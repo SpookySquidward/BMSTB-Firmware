@@ -43,7 +43,7 @@ class main:
             pass
         
         # Once all samples have been taken successfully, return their scaled mean
-        return adc_counts / (self.local_adc_read_samples * 65535)
+        return (adc_counts * 3.0) / (self.local_adc_read_samples * 65535)
 
 
     def read_ADC_5V(self):
