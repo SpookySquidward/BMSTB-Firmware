@@ -114,7 +114,7 @@ def reset_device(device: Serial, retry_count: int = 3) -> None:
         raise SerialException("Failed to reset device because queued or running code could not be cancelled.")
     
     # Send ctrl-D (ASCII code 0x04) to reset the target device
-    reset_success = cancel_success = _send_bytes(b'\x04', device, b'\r\n' + _seq_cmd_prompt, retry_count, expected_sequence_is_complete=False)
+    reset_success = _send_bytes(b'\x04', device, b'\r\n' + _seq_cmd_prompt, retry_count, expected_sequence_is_complete=False)
     if not reset_success:
         raise SerialException("Failed to reset device because it did not resmpond to a soft reset request.")
 
