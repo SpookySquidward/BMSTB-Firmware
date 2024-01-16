@@ -103,7 +103,7 @@ def execute_function(function_name: str, device: Serial, *args, **kwargs) -> str
     # Using the given function name and arguments, construct a line of code to execute remotely
     args_str = ', '.join(str(arg) for arg in args)
     kwargs_str = ', '.join(f'{key} = {value}' for key, value in kwargs.items())
-    code_to_execute = f"{function_name}({', '.join((args_str, kwargs_str))})"
+    code_to_execute = f"{function_name}({', '.join((args_str, kwargs_str)) if args_str != "" and kwargs_str != "" else args_str + kwargs_str})"
     
     # Execute the relevant code and return the result
     return execute_code(code_to_execute, device)
