@@ -3,6 +3,7 @@ import settings
 
 
 _seq_cmd_prompt = b'>>> '
+_board_obj_name = "board"
 
 
 def _send_bytes(target_bytes: bytes, device: Serial, expected_sequence: bytes, retry_count: int = 1, expected_sequence_is_complete: bool = True) -> bool:
@@ -42,8 +43,7 @@ def execute_code(code: str, device: Serial, retry_count: int = None):
     """
     
     # Set retry_count to its default value if not specified
-    if retry_count is None:
-        retry_count = settings.current_settings[settings._key_serial_retry_count]
+    retry_count = settings.current_settings[settings._key_serial_retry_count] if retry_count is None else retry_count
     
     # Convert input code to ASCII bytes for serial transmission
     code_bytes = bytes(code, "ASCII", "strict")
@@ -126,6 +126,58 @@ def reset_device(device: Serial, retry_count: int = None) -> None:
         raise SerialException("Failed to reset device because it did not resmpond to a soft reset request.")
 
 
+def init_device(device: Serial, local_adc_read_samples: int = None, local_adc_read_frequency: int = None) -> None:
+    """Initializes the target device.
+
+    Args:
+        device (Serial): The target device.
+        local_adc_read_samples (int): The number of samples to read from the local ADCs (5V and 24V sense) each time a
+        read call is made. If None, defaults to the value specified in the settings file. Defaults to None.
+        local_adc_read_frequency (int): The frequency at which to read from the local ADCs (5V and 24V sense) each time
+        a read call is made. If None, defaults to the value specified in the settings file. Defaults to None.
+    """
+    
+    # Set parameters to their default values if not specified
+    local_adc_read_samples = settings.current_settings[settings._key_local_adc_read_samples] if local_adc_read_samples is None else local_adc_read_samples
+    local_adc_read_frequency = settings.current_settings[settings._key_local_adc_read_frequency] if local_adc_read_frequency is None else local_adc_read_frequency
+    
+    # Initialize the device
+    function_name = _board_obj_name + " = main"
+    execute_function(function_name, device, local_adc_read_samples=local_adc_read_samples, local_adc_read_frequency=local_adc_read_frequency)
+    
+    
+def read_ADC_5V(device: Serial) -> float:
+    """Reads the SENSE_5V ADC line on the target device.
+
+    Args:
+        device (Serial): The target device.
+
+    Returns:
+        float: A value between 0.0 and 1.0 read from the SENSE_5V ADC line, where 0.0 corresponds to 0.0V and 1.0
+        corresponds to 3.0V nominal.
+    """
+    
+    function_name = _board_obj_name + ".read_ADC_5V"
+    reading = execute_function(function_name, device)
+    return float(reading)
+
+
+def read_ADC_24V(device: Serial) -> float:
+    """Reads the SENSE_24V ADC line on the target device.
+
+    Args:
+        device (Serial): The target device.
+
+    Returns:
+        float: A value between 0.0 and 1.0 read from the SENSE_24V ADC line, where 0.0 corresponds to 0.0V and 1.0
+        corresponds to 3.0V nominal.
+    """
+    
+    function_name = _board_obj_name + ".read_ADC_24V"
+    reading = execute_function(function_name, device)
+    return float(reading)
+
+
 if __name__ == "__main__":
     import time
 
@@ -141,9 +193,10 @@ if __name__ == "__main__":
     # This line should give a NameError, as the target device will have been reset and x will no longer be defined
     print(execute_code("x", ser))
     
-    # Print a random integer
-    execute_code("from random import randrange", ser)
-    print(execute_function("randrange", ser, 3, 1, 1000))
+    # Read the 5V and 24V rails
+    init_device(ser)
+    print("5V rail reading: ", read_ADC_5V(ser))
+    print("24V rail reading: ", read_ADC_24V(ser))
     
     # Blink the LED
     execute_code("from machine import Pin", ser)
