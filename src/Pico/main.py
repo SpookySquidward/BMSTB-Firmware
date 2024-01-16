@@ -15,7 +15,7 @@ class main:
         self.adc_read_frequency = adc_read_frequency
 
 
-    def read_ADC(self, adc):
+    def _read_ADC(self, adc):
         # Take self.adc_read_samples samples from the specified adc port and return the scaled mean (0-1 float)
         adc_counts = 0
         samples_remaining = self.adc_read_samples
@@ -47,8 +47,8 @@ class main:
 
 
     def read_ADC_5V(self):
-        return self.read_ADC(self.adc_sense_5V)
+        return self._read_ADC(self.adc_sense_5V)
 
 
     def read_ADC_24V(self):
-        return self.read_ADC(self.adc_sense_24V)
+        return self._read_ADC(self.adc_sense_24V)
