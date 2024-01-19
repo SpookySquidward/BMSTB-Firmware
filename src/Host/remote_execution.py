@@ -125,7 +125,10 @@ def reset_device(device: Serial, retry_count: int = None) -> None:
         raise SerialException("Failed to reset device because it did not resmpond to a soft reset request.")
 
 
-def init_device(device: Serial, local_adc_read_samples: int = None, local_adc_read_frequency: int = None) -> None:
+def init_device(device: Serial,
+                local_adc_read_samples: int = None,
+                local_adc_read_frequency: int = None,
+                i2c_frequency: int = None) -> None:
     """Initializes the target device.
 
     Args:
@@ -134,15 +137,22 @@ def init_device(device: Serial, local_adc_read_samples: int = None, local_adc_re
         read call is made. If None, defaults to the value specified in the settings file. Defaults to None.
         local_adc_read_frequency (int): The frequency at which to read from the local ADCs (5V and 24V sense) each time
         a read call is made. If None, defaults to the value specified in the settings file. Defaults to None.
+        i2c_frequency (int): The clock frequency of the onboard I2C bus. If None, defaults to the value specified in the
+        settings file. Defaults to None.
     """
     
     # Set parameters to their default values if not specified
     local_adc_read_samples = settings.current_settings[settings._key_local_adc_read_samples] if local_adc_read_samples is None else local_adc_read_samples
     local_adc_read_frequency = settings.current_settings[settings._key_local_adc_read_frequency] if local_adc_read_frequency is None else local_adc_read_frequency
+    i2c_frequency = settings.current_settings[settings._key_i2c_bus_frequency] if i2c_frequency is None else i2c_frequency
     
     # Initialize the device
     function_name = _board_obj_name + " = main"
-    execute_function(function_name, device, local_adc_read_samples=local_adc_read_samples, local_adc_read_frequency=local_adc_read_frequency)
+    execute_function(function_name,
+                     device,
+                     local_adc_read_samples = local_adc_read_samples, 
+                     local_adc_read_frequency = local_adc_read_frequency,
+                     i2c_frequency = i2c_frequency)
     
     
 def read_ADC_5V(device: Serial) -> float:
@@ -197,7 +207,7 @@ if __name__ == "__main__":
     from calibration import calibration
 
     settings.load_saved_settings()
-    ser = Serial(port="COM3",
+    ser = Serial(port="COM4",
                  baudrate=settings.current_settings[settings._key_serial_baudrate],
                  timeout=settings.current_settings[settings._key_serial_timeout])
     

@@ -11,6 +11,7 @@ _key_serial_retry_count = "serial transmission retry count"
 _key_status_LED_blink_rate = "Status LED blink rate (Hz)"
 _key_local_adc_read_samples = "5V/24V rail monitor samples"
 _key_local_adc_read_frequency = "5V/24V rail monitor sample frequency (Hz)"
+_key_i2c_bus_frequency = "I2C bus clock frequency (Hz)"
 _key_last_calibrated = "last calibrated (UTC)"
 _key_cal_5V = "5V rail monitor calibration"
 _key_cal_24V = "24V rail monitor calibration"
@@ -26,6 +27,7 @@ _default_settings = {
     _key_status_LED_blink_rate: 5,
     _key_local_adc_read_samples: 1024,
     _key_local_adc_read_frequency: 25000,
+    _key_i2c_bus_frequency: 400000,
     _key_last_calibrated : None,
     _key_cal_5V: None,
     _key_cal_24V: None,

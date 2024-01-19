@@ -1,15 +1,19 @@
-from machine import ADC, Pin, Timer
-from array import array
-
+from machine import ADC, Pin, Timer, I2C
+import i2c_devices
 
 class main:
-    def __init__(self, local_adc_read_samples, local_adc_read_frequency):
+    def __init__(self, local_adc_read_samples, local_adc_read_frequency, i2c_frequency: int):
         # Pin definitions
         self.pin_sense_24V = Pin(27)
         self.adc_sense_24V = ADC(self.pin_sense_24V)
         self.pin_sense_5V = Pin(26)
         self.adc_sense_5V = ADC(self.pin_sense_5V)
+        
         self.pin_led = Pin(25, Pin.OUT)
+        
+        self.pin_scl = Pin(21, Pin.OUT)
+        self.pin_sda = Pin(20, Pin.OUT)
+        self.i2c = I2C(0, scl = self.pin_scl, sda = self.pin_sda, freq = i2c_frequency)
         
         # ADC read information
         self.local_adc_read_samples = local_adc_read_samples
