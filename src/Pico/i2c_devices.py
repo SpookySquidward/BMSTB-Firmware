@@ -2,7 +2,7 @@
 from machine import I2C
 
 
-def _changebit(self, bitmap: bytes, bit: int, value: int):
+def _changebit(bitmap: bytes, bit: int, value: int):
     if value == 0:
         return int(bitmap[0] & ~(1 << bit)).to_bytes(1, "big")
     elif value == 1:
