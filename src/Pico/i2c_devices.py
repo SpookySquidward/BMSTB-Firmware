@@ -36,6 +36,6 @@ class PCA9539:
         new_output_port = _changebit(current_output_port, pin_offset, int(value))
         self.i2c.writeto_mem(self.address, output_port_address, new_output_port)
         
-        # Set the specified pin to be anoutput pin
+        # Set the specified pin to be an output pin
         new_configuration_port = _changebit(current_configuration_port, pin_offset, 0)
         self.i2c.writeto_mem(self.address, configuration_port_address, new_configuration_port)
