@@ -2,7 +2,7 @@ from machine import ADC, Pin, Timer, I2C
 import i2c_devices
 
 class main:
-    def __init__(self, local_adc_read_samples, local_adc_read_frequency, i2c_frequency: int):
+    def __init__(self, local_adc_read_samples: int, local_adc_read_frequency: int, i2c_frequency: int):
         # Pin definitions
         self.pin_sense_24V = Pin(27)
         self.adc_sense_24V = ADC(self.pin_sense_24V)
@@ -24,7 +24,7 @@ class main:
         self.set_status_LED(False)
 
 
-    def _read_ADC(self, adc):
+    def _read_ADC(self, adc: ADC):
         # Take self.adc_read_samples samples from the specified adc port and return the scaled mean (0-1 float)
         adc_counts = 0
         samples_remaining = self.local_adc_read_samples
@@ -63,7 +63,7 @@ class main:
         return self._read_ADC(self.adc_sense_24V)
     
     
-    def set_status_LED(self, blink_LED, blink_rate = None):
+    def set_status_LED(self, blink_LED: bool, blink_rate: int = None):
         # If blink_LED is True, start blinking at blink_rate
         if blink_LED:
             def blink_callback(_):
